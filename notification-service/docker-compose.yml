@@ -1,0 +1,29 @@
+# Docker Compose for Notification Service
+# This service connects to the shared infrastructure (Kafka + MongoDB)
+# Shared infrastructure is deployed separately - see shared-infrastructure/docker-compose.yml
+
+services:
+  # Notification Service
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notification-service
+    ports:
+      - "5005:5005"
+    environment:
+      PORT: 5005
+      # Connect to shared Kafka cluster (using internal network)
+      KAFKA_BROKERS: kafka-broker:29092
+      KAFKA_CLIENT_ID: notification-service-client
+      LOG_LEVEL: info
+    networks:
+      - shared-network
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+networks:
+  shared-network:
+    external: true
+    name: shared-infrastructure_shared-network

@@ -1,0 +1,31 @@
+# Docker Compose for Inventory Service
+# This service connects to the shared Kafka infrastructure cluster
+# Kafka is deployed separately - see kafka-infrastructure/docker-compose.yml
+
+services:
+  # Inventory Service
+  inventory-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: inventory-service
+    ports:
+      - "5004:5004"  # HTTP port
+      - "50041:50041"  # gRPC port
+    environment:
+      HTTP_PORT: 5004
+      GRPC_PORT: 50041
+      # Connect to shared Kafka cluster (using internal network)
+      KAFKA_BROKERS: kafka-broker:29092
+      KAFKA_CLIENT_ID: inventory-service-client
+      LOG_LEVEL: info
+    networks:
+      - shared-network
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+networks:
+  shared-network:
+    external: true
+    name: shared-infrastructure_shared-network

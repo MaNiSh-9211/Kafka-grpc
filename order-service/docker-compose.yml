@@ -1,0 +1,32 @@
+# Docker Compose for Order Service
+# This service connects to the shared infrastructure (Kafka + MongoDB)
+# Shared infrastructure is deployed separately - see shared-infrastructure/docker-compose.yml
+
+services:
+  # Order Service
+  order-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: order-service
+    ports:
+      - "5002:5002"
+    environment:
+      PORT: 5002
+      # Connect to shared Kafka cluster (using internal network)
+      KAFKA_BROKERS: kafka-broker:29092
+      KAFKA_CLIENT_ID: order-service-client
+      # gRPC service URLs (using container names when services are on same network)
+      PAYMENT_SERVICE_URL: payment-service:50031
+      INVENTORY_SERVICE_URL: inventory-service:50041
+      LOG_LEVEL: info
+    networks:
+      - shared-network
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+networks:
+  shared-network:
+    external: true
+    name: shared-infrastructure_shared-network

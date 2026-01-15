@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package payment;
+
+/**
+ * Payment Service gRPC Definition
+ * 
+ * This defines the synchronous RPC methods for the Payment Service.
+ * Used when other services need immediate payment processing results.
+ */
+
+// Payment Service - Handles payment processing
+service PaymentService {
+  // Process a payment (unary RPC - request/response)
+  rpc ProcessPayment (ProcessPaymentRequest) returns (ProcessPaymentResponse);
+  
+  // Refund a payment
+  rpc RefundPayment (RefundPaymentRequest) returns (RefundPaymentResponse);
+  
+  // Get payment status
+  rpc GetPaymentStatus (GetPaymentStatusRequest) returns (GetPaymentStatusResponse);
+}
+
+// Request to process a payment
+message ProcessPaymentRequest {
+  string orderId = 1;           // Order ID associated with payment
+  string userId = 2;            // User making the payment
+  double amount = 3;            // Payment amount
+  string currency = 4;         // Currency code (USD, EUR, etc.)
+  PaymentMethod paymentMethod = 5; // Payment method
+  string cardNumber = 6;        // Card number (last 4 digits)
+}
+
+// Response from payment processing
+message ProcessPaymentResponse {
+  string paymentId = 1;         // Unique payment ID
+  PaymentStatus status = 2;     // Payment status
+  string message = 3;          // Status message
+  int64 timestamp = 4;         // Processing timestamp
+}
+
+// Request to refund a payment
+message RefundPaymentRequest {
+  string paymentId = 1;        // Payment ID to refund
+  double amount = 2;           // Refund amount (partial or full)
+  string reason = 3;           // Refund reason
+}
+
+// Response from refund
+message RefundPaymentResponse {
+  string refundId = 1;         // Unique refund ID
+  bool success = 2;           // Refund success status
+  string message = 3;         // Status message
+}
+
+// Request to get payment status
+message GetPaymentStatusRequest {
+  string paymentId = 1;        // Payment ID to check
+}
+
+// Response with payment status
+message GetPaymentStatusResponse {
+  string paymentId = 1;        // Payment ID
+  PaymentStatus status = 2;    // Current status
+  double amount = 3;           // Payment amount
+  int64 timestamp = 4;         // Payment timestamp
+}
+
+// Payment method enum
+enum PaymentMethod {
+  CREDIT_CARD = 0;
+  DEBIT_CARD = 1;
+  PAYPAL = 2;
+  BANK_TRANSFER = 3;
+}
+
+// Payment status enum
+enum PaymentStatus {
+  PENDING = 0;
+  PROCESSING = 1;
+  COMPLETED = 2;
+  FAILED = 3;
+  REFUNDED = 4;
+}
+

@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+package inventory;
+
+/**
+ * Inventory Service gRPC Definition
+ * 
+ * This defines the synchronous RPC methods for the Inventory Service.
+ * Used when other services need immediate inventory information.
+ */
+
+// Inventory Service - Manages product inventory
+service InventoryService {
+  // Check if product is in stock (unary RPC)
+  rpc CheckStock (CheckStockRequest) returns (CheckStockResponse);
+  
+  // Reserve inventory for an order
+  rpc ReserveInventory (ReserveInventoryRequest) returns (ReserveInventoryResponse);
+  
+  // Release reserved inventory
+  rpc ReleaseInventory (ReleaseInventoryRequest) returns (ReleaseInventoryResponse);
+  
+  // Update inventory quantity
+  rpc UpdateInventory (UpdateInventoryRequest) returns (UpdateInventoryResponse);
+  
+  // Get product inventory details
+  rpc GetInventory (GetInventoryRequest) returns (GetInventoryResponse);
+}
+
+// Request to check stock
+message CheckStockRequest {
+  string productId = 1;        // Product ID to check
+  int32 quantity = 2;         // Required quantity
+}
+
+// Response with stock information
+message CheckStockResponse {
+  string productId = 1;       // Product ID
+  bool inStock = 2;           // Whether product is in stock
+  int32 availableQuantity = 3; // Available quantity
+  int32 reservedQuantity = 4;  // Reserved quantity
+}
+
+// Request to reserve inventory
+message ReserveInventoryRequest {
+  string orderId = 1;         // Order ID
+  string productId = 2;       // Product ID
+  int32 quantity = 3;         // Quantity to reserve
+}
+
+// Response from reservation
+message ReserveInventoryResponse {
+  string reservationId = 1;   // Reservation ID
+  bool success = 2;          // Reservation success
+  string message = 3;        // Status message
+}
+
+// Request to release inventory
+message ReleaseInventoryRequest {
+  string reservationId = 1;  // Reservation ID to release
+  string orderId = 2;        // Order ID (for validation)
+}
+
+// Response from release
+message ReleaseInventoryResponse {
+  bool success = 1;          // Release success
+  string message = 2;       // Status message
+}
+
+// Request to update inventory
+message UpdateInventoryRequest {
+  string productId = 1;      // Product ID
+  int32 quantity = 2;        // New quantity (or delta)
+  UpdateType updateType = 3; // Type of update
+}
+
+// Response from update
+message UpdateInventoryResponse {
+  string productId = 1;      // Product ID
+  int32 newQuantity = 2;     // New quantity after update
+  bool success = 3;         // Update success
+}
+
+// Request to get inventory
+message GetInventoryRequest {
+  string productId = 1;      // Product ID
+}
+
+// Response with inventory details
+message GetInventoryResponse {
+  string productId = 1;      // Product ID
+  string productName = 2;    // Product name
+  int32 totalQuantity = 3;   // Total quantity
+  int32 availableQuantity = 4; // Available quantity
+  int32 reservedQuantity = 5;  // Reserved quantity
+}
+
+// Update type enum
+enum UpdateType {
+  SET = 0;      // Set to exact quantity
+  ADD = 1;      // Add to current quantity
+  SUBTRACT = 2; // Subtract from current quantity
+}
+

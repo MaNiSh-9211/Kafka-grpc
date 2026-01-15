@@ -1,0 +1,29 @@
+# Docker Compose for User Service
+# This service connects to the shared infrastructure (Kafka + MongoDB)
+# Shared infrastructure is deployed separately - see shared-infrastructure/docker-compose.yml
+
+services:
+  # User Service
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "5001:5001"
+    environment:
+      PORT: 5001
+      # Connect to shared Kafka cluster (using internal network)
+      KAFKA_BROKERS: kafka-broker:29092
+      KAFKA_CLIENT_ID: user-service-client
+      LOG_LEVEL: info
+    networks:
+      - shared-network
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+networks:
+  shared-network:
+    external: true
+    name: shared-infrastructure_shared-network

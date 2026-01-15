@@ -1,0 +1,15 @@
+# Files to exclude from Docker build context
+# This reduces build time and image size
+
+node_modules
+dist
+logs
+*.log
+.env
+.env.local
+.git
+.gitignore
+README.md
+*.md
+.DS_Store
+
